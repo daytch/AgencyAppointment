@@ -68,5 +68,10 @@ namespace Agency.Infrastructure.Repositories
         }
         public async Task<IEnumerable<Appointment>> GetByAgencyIdAsync(int agencyId)
        => await _context.Appointments.Where(a => a.AgencyId == agencyId).ToListAsync();
+
+        public async Task<List<CustomerAppointment>> GetDailyQueueAsync(DateTime date) => await _context.CustomerAppointments
+            .Where(a => a.AppointmentDate >= date.Date && a.AppointmentDate <= date.Date.AddDays(1).AddTicks(-1))
+            .OrderBy(a => a.CreatedAt)
+            .ToListAsync();
     }
 }

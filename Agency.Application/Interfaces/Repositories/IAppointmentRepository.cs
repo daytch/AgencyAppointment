@@ -1,4 +1,5 @@
 ﻿using Agency.Domain.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Agency.Application.Interfaces.Repositories
 {
@@ -12,5 +13,6 @@ namespace Agency.Application.Interfaces.Repositories
         Task DeleteAsync(int id);
         Task<int> CountByDateAsync(int agencyId, DateTime date);
         Task<IEnumerable<Appointment>> GetByAgencyIdAsync(int agencyId);
+        Task<List<CustomerAppointment>> GetDailyQueueAsync(DateTime date);
     }
 }

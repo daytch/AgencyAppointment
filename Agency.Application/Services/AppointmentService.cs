@@ -11,7 +11,7 @@ public class AppointmentService : IAppointmentService
     private readonly IAgencyHolidayRepository _holidayRepo;
     private readonly IAgencyRepository _agencyRepo;
 
-    public AppointmentService(IAppointmentRepository appointmentRepo,IAgencyHolidayRepository holidayRepository,IAgencyRepository agencyRepository)
+    public AppointmentService(IAppointmentRepository appointmentRepo, IAgencyHolidayRepository holidayRepository, IAgencyRepository agencyRepository)
     {
         _appointmentRepo = appointmentRepo;
         _holidayRepo = holidayRepository;
@@ -57,10 +57,6 @@ public class AppointmentService : IAppointmentService
     {
         var start = date.Date;
         var end = date.Date.AddDays(1).AddTicks(-1);
-
-        return await _db.CustomerAppointments
-            .Where(a => a.AppointmentDate >= start && a.AppointmentDate <= end)
-            .OrderBy(a => a.CreatedAt)
-            .ToListAsync();
+        return await _appointmentRepo.GetDailyQueueAsync(date);
     }
 }
