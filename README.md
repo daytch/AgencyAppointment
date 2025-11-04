@@ -32,14 +32,40 @@ The project follows a **layered architecture** to ensure maintainability and cle
 
 ```
 AgencyAppointment/
+├── Agency.Api
+│   ├── Connected Services
+│   ├── Dependencies
+│   ├── Properties
+│   ├── Controllers
+│   ├── appsettings.json
+│   └── Program.cs
 │
-├── src/
-│   ├── AgencyAppointment.WebAPI/        → Web API layer (Controllers, Swagger, DI)
-│   ├── AgencyAppointment.Business/      → Core business logic (Services, Interfaces)
-│   ├── AgencyAppointment.Data/          → Data access (Repositories, Models)
-│   └── AgencyAppointment.Tests/         → Unit tests (xUnit / NUnit)
+├── Agency.Application
+│   ├── Dependencies
+│   ├── DTOs
+│   ├── Interfaces
+│   │ ├── Repositories
+│   │ └── Services
+│   │ └── IAgencyService.cs
+│   └── Services
 │
-└── global.json                          → Forces SDK version (8.0.x)
+├── Agency.Domain
+│    ├── Dependencies
+│    └── Entities
+│    │
+│    Agency.Infrastructure
+│    ├── Dependencies
+│    ├── Data
+│    │ ├── Configurations
+│    │ ├── AppDbContext.cs
+│    │ └── AppDbContextFactory.cs
+│    ├── Migrations
+│    ├── Repositories
+│    ├── Agency.Infrastructure.csproj.Backup.tmp
+│    ├── appsettings.json
+│    └── DependencyInjection.cs
+│      
+└── Agency.Tests
 ```
 
 ---
