@@ -1,6 +1,7 @@
 ﻿using Agency.Application.DTOs;
 using Agency.Application.Services;
 using Agency.Domain.Entities;
+using Agency.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agency.Api.Controllers;
@@ -9,22 +10,13 @@ namespace Agency.Api.Controllers;
 [Route("api/[controller]")]
 public class AppointmentController : ControllerBase
 {
-    private readonly AppointmentService _service;
-    public AppointmentController(AppointmentService service) => _service = service;
+    private readonly IAppointmentService _service;
+    public AppointmentController(IAppointmentService service) => _service = service;
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateAppointmentRequest request)
     {
-        var appointment = new Appointment
-        {
-            AgencyId = request.AgencyId,
-            CustomerName = request.CustomerName,
-            CustomerEmail = request.CustomerEmail,
-            AppointmentDate = request.Date,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        var created = await _service.CreateAppointmentAsync(appointment);
+        var created = await _service.CreateAppointmentAsync(request);
         return Ok(created);
     }
 

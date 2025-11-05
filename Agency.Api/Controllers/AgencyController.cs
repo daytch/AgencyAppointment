@@ -1,4 +1,4 @@
-﻿using Agency.Application.Services;
+﻿using Agency.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Agency.Api.Controllers;
@@ -7,8 +7,8 @@ namespace Agency.Api.Controllers;
 [Route("api/[controller]")]
 public class AgencyController : ControllerBase
 {
-    private readonly AgencyService _service;
-    public AgencyController(AgencyService service) => _service = service;
+    private readonly IAgencyService _service;
+    public AgencyController(IAgencyService service) => _service = service;
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] Agency.Domain.Entities.Agency agency)

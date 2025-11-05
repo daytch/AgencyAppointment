@@ -1,5 +1,7 @@
 ﻿using Agency.Application.Interfaces.Repositories;
+using Agency.Application.Interfaces.Services;
 using Agency.Application.Services;
+using Agency.Domain.Interfaces;
 using Agency.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,11 +16,10 @@ public static class DependencyInjection
         services.AddDbContext<Data.AppDbContext>(options =>
             options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
 
-        services.AddScoped<AppointmentService>();
-        services.AddScoped<AgencyService>();
-        services.AddScoped<OffDayService>();
+        services.AddScoped<IAppointmentService, AppointmentService>();
+        services.AddScoped<IAgencyService,AgencyService>();
+        services.AddScoped<IOffDayService,OffDayService>();
 
-        services.AddScoped<IAgencyHolidayRepository, AgencyHolidayRepository>();
         services.AddScoped<IOffDayRepository, OffDayRepository>();
         services.AddScoped<IAgencyRepository, AgencyRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();

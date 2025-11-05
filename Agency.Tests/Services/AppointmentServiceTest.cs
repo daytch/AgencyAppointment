@@ -7,25 +7,27 @@ using Agency.Application.Services;
 using Agency.Application.Interfaces.Repositories;
 using Agency.Domain.Entities;
 
+using DomainAgency = Agency.Domain.Entities.Agency;
+
 namespace Agency.Tests.Services
 {
     public class AppointmentServiceTests
     {
         private readonly Mock<IAppointmentRepository> _appointmentRepoMock;
-        private readonly Mock<IAgencyHolidayRepository> _holidayRepoMock;
         private readonly Mock<IAgencyRepository> _agencyRepoMock;
+        private readonly Mock<IOffDayRepository> _offDayRepoMock;
         private readonly AppointmentService _service;
 
         public AppointmentServiceTests()
         {
             _appointmentRepoMock = new Mock<IAppointmentRepository>();
-            _holidayRepoMock = new Mock<IAgencyHolidayRepository>();
             _agencyRepoMock = new Mock<IAgencyRepository>();
+            _offDayRepoMock = new Mock<IOffDayRepository>();
 
             _service = new AppointmentService(
                 _appointmentRepoMock.Object,
-                _holidayRepoMock.Object,
-                _agencyRepoMock.Object
+                _agencyRepoMock.Object,
+                _offDayRepoMock.Object
             );
         }
 
@@ -37,7 +39,7 @@ namespace Agency.Tests.Services
 
             _agencyRepoMock
                 .Setup(r => r.GetByIdAsync(appointment.AgencyId))
-                .ReturnsAsync((Agency)null);
+                .ReturnsAsync((DomainAgency)null);
 
             // Act & Assert
             var ex = await Assert.ThrowsAsync<Exception>(() =>
@@ -50,7 +52,7 @@ namespace Agency.Tests.Services
         [Fact]
         public async Task CreateAppointmentAsync_ShouldThrow_WhenHoliday()
         {
-            var agency = new Agency { Id = 1, MaxAppointmentsPerDay = 5 };
+            var agency = new DomainAgency { Id = 1, MaxAppointmentsPerDay = 5 };
             var appointment = new Appointment
             {
                 AgencyId = 1,
@@ -58,7 +60,7 @@ namespace Agency.Tests.Services
             };
 
             _agencyRepoMock.Setup(r => r.GetByIdAsync(agency.Id)).ReturnsAsync(agency);
-            _holidayRepoMock.Setup(r => r.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
+            _offDayRepoMock.Setup(r => r.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
                 .ReturnsAsync(true);
 
             var ex = await Assert.ThrowsAsync<Exception>(() =>
@@ -72,7 +74,7 @@ namespace Agency.Tests.Services
         public async Task CreateAppointmentAsync_ShouldShiftDate_WhenFull()
         {
             // Arrange
-            var agency = new Agency { Id = 1, MaxAppointmentsPerDay = 2 };
+            var agency = new DomainAgency { Id = 1, MaxAppointmentsPerDay = 2 };
             var initialDate = new DateTime(2025, 11, 11);
             var appointment = new Appointment
             {
@@ -83,12 +85,12 @@ namespace Agency.Tests.Services
             _agencyRepoMock.Setup(r => r.GetByIdAsync(agency.Id)).ReturnsAsync(agency);
 
             // Hari pertama penuh
-            _holidayRepoMock.Setup(r => r.IsHolidayAsync(initialDate, agency.Id)).ReturnsAsync(false);
+            _offDayRepoMock.Setup(r => r.IsHolidayAsync(initialDate, agency.Id)).ReturnsAsync(false);
             _appointmentRepoMock.Setup(r => r.CountByDateAsync(agency.Id, initialDate)).ReturnsAsync(2);
 
             // Hari kedua tidak libur & masih ada slot
             var nextDate = initialDate.AddDays(1);
-            _holidayRepoMock.Setup(r => r.IsHolidayAsync(nextDate, agency.Id)).ReturnsAsync(false);
+            _offDayRepoMock.Setup(r => r.IsHolidayAsync(nextDate, agency.Id)).ReturnsAsync(false);
             _appointmentRepoMock.Setup(r => r.CountByDateAsync(agency.Id, nextDate)).ReturnsAsync(0);
 
             _appointmentRepoMock
@@ -106,12 +108,12 @@ namespace Agency.Tests.Services
         [Fact]
         public async Task CreateAppointmentAsync_ShouldReturnAppointmentWithToken_WhenSuccess()
         {
-            var agency = new Agency { Id = 10, MaxAppointmentsPerDay = 3 };
+            var agency = new DomainAgency { Id = 10, MaxAppointmentsPerDay = 3 };
             var date = new DateTime(2025, 11, 15);
             var appointment = new Appointment { AgencyId = 10, AppointmentDate = date };
 
             _agencyRepoMock.Setup(r => r.GetByIdAsync(agency.Id)).ReturnsAsync(agency);
-            _holidayRepoMock.Setup(r => r.IsHolidayAsync(date, agency.Id)).ReturnsAsync(false);
+            _offDayRepoMock.Setup(r => r.IsHolidayAsync(date, agency.Id)).ReturnsAsync(false);
             _appointmentRepoMock.Setup(r => r.CountByDateAsync(agency.Id, date)).ReturnsAsync(1);
             _appointmentRepoMock
                 .Setup(r => r.AddAsync(It.IsAny<Appointment>()))

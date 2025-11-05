@@ -13,4 +13,8 @@ public class OffDayRepository : IOffDayRepository
 
     public async Task<IEnumerable<OffDay>> GetByAgencyIdAsync(int agencyId)
         => await _context.OffDays.Where(o => o.AgencyId == agencyId).ToListAsync();
+
+    public async Task<bool> IsHolidayAsync(DateTime date, int agencyId) => await _context.OffDays.AnyAsync(h => h.AgencyId == agencyId && h.Date == date.Date);
+
+    public async Task<OffDay> AddSync(OffDay offDay) { await _context.OffDays.AddAsync(offDay); return offDay; }
 }

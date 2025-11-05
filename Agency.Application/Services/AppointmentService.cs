@@ -8,43 +8,46 @@ namespace Agency.Application.Services;
 public class AppointmentService : IAppointmentService
 {
     private readonly IAppointmentRepository _appointmentRepo;
-    private readonly IAgencyHolidayRepository _holidayRepo;
     private readonly IAgencyRepository _agencyRepo;
+    private readonly IOffDayRepository _offDayRepo;
 
-    public AppointmentService(IAppointmentRepository appointmentRepo, IAgencyHolidayRepository holidayRepository, IAgencyRepository agencyRepository)
+    public AppointmentService(IAppointmentRepository appointmentRepo, IAgencyRepository agencyRepository, IOffDayRepository offDayRepository)
     {
         _appointmentRepo = appointmentRepo;
-        _holidayRepo = holidayRepository;
         _agencyRepo = agencyRepository;
+        _offDayRepo = offDayRepository;
     }
 
-    public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
+    public async Task<Appointment> CreateAppointmentAsync(CreateAppointmentRequest request)
     {
+        var appointment = new Appointment
+        {
+            AgencyId = request.AgencyId,
+            CustomerName = request.CustomerName,
+            CustomerEmail = request.CustomerEmail,
+            AppointmentDate = request.Date,
+            CreatedAt = DateTime.UtcNow
+        };
         var agency = await _agencyRepo.GetByIdAsync(appointment.AgencyId);
         if (agency == null)
             throw new Exception("Agency not found");
 
-        // ✅ Cek hari libur
-        if (await _holidayRepo.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
+        if (await _offDayRepo.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
             throw new Exception("Cannot book on a holiday");
 
-        // ✅ Hitung jumlah appointment hari ini
         var countToday = await _appointmentRepo.CountByDateAsync(agency.Id, appointment.AppointmentDate);
 
-        // ✅ Kalau sudah penuh, geser ke hari berikutnya yang bukan libur
         while (countToday >= agency.MaxAppointmentsPerDay)
         {
             appointment.AppointmentDate = appointment.AppointmentDate.AddDays(1);
-            if (await _holidayRepo.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
-                continue; // lewati kalau hari libur
+            if (await _offDayRepo.IsHolidayAsync(appointment.AppointmentDate, agency.Id))
+                continue;
             countToday = await _appointmentRepo.CountByDateAsync(agency.Id, appointment.AppointmentDate);
         }
 
-        // ✅ Generate TokenNumber
         var nextNumber = countToday + 1;
         appointment.TokenNumber = $"{agency.Id}-{appointment.AppointmentDate:yyyyMMdd}-{nextNumber:D3}";
 
-        // ✅ Simpan appointment
         return await _appointmentRepo.AddAsync(appointment);
     }
 

@@ -1,0 +1,49 @@
+name: Deploy Qwiik API to Ubuntu
+
+on:
+  push:
+    branches:
+      - main  # deploy otomatis setiap push ke main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'  # sesuaikan versi project kamu
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build & Publish
+        run: dotnet publish -c Release -r linux-x64 --self-contained false -o ./publish
+
+      # Deploy to Ubuntu via SSH
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.6
+        with: 
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: 22222
+          source: "./publish/*"
+          target: "/home/daytch/dev/qwiik"
+
+      - name: Restart service on server
+        uses: appleboy/ssh-action@v1.0.3
+        with: 
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          port: 22222
+          script: |
+            sudo systemctl restart qwiik
+            sudo systemctl status qwiik --no-pager
