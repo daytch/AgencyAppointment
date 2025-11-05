@@ -3,7 +3,7 @@ name: Deploy Qwiik API to Ubuntu
 on:
   push:
     branches:
-      - main  # deploy otomatis setiap push ke main
+      - master
 
 jobs:
   deploy:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'  # sesuaikan versi project kamu
+          dotnet-version: '8.0.412'
 
       - name: Restore dependencies
         run: dotnet restore
