@@ -52,7 +52,7 @@ namespace Agency.Tests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returned = Assert.IsType<AppointmentResponse>(okResult.Value);
+            var returned = Assert.IsType<Appointment>(okResult.Value);
             Assert.Equal(expected.Id, returned.Id);
             Assert.Equal(expected.CustomerName, returned.CustomerName);
         }
@@ -105,8 +105,8 @@ namespace Agency.Tests.Controllers
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedQueue = Assert.IsAssignableFrom<IEnumerable<AppointmentQueueDto>>(okResult.Value);
-            Assert.Equal(2, ((List<AppointmentQueueDto>)returnedQueue).Count);
+            var returnedQueue = Assert.IsAssignableFrom<IEnumerable<CustomerAppointment>>(okResult.Value);
+            Assert.Equal(2, ((List<CustomerAppointment>)returnedQueue).Count);
         }
     }
 }
