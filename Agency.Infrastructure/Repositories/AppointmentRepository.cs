@@ -64,13 +64,13 @@ namespace Agency.Infrastructure.Repositories
         public async Task<int> CountByDateAsync(int agencyId, DateTime date)
         {
             return await _context.Appointments.Where(x => x.AgencyId == agencyId)
-                .CountAsync(a => a.AppointmentDate == date);
+                .CountAsync(a => a.AppointmentDate.Date == date.Date);
         }
         public async Task<IEnumerable<Appointment>> GetByAgencyIdAsync(int agencyId)
        => await _context.Appointments.Where(a => a.AgencyId == agencyId).ToListAsync();
 
         public async Task<List<CustomerAppointment>> GetDailyQueueAsync(DateTime date) => await _context.CustomerAppointments
-            .Where(a => a.AppointmentDate >= date.Date && a.AppointmentDate <= date.Date.AddDays(1).AddTicks(-1))
+            .Where(a => a.AppointmentDate.Date >= date.Date && a.AppointmentDate.Date <= date.Date.AddDays(1).AddTicks(-1))
             .OrderBy(a => a.CreatedAt)
             .ToListAsync();
     }
